@@ -1,0 +1,15 @@
+{
+  "name": "segment_finder",
+  "version": "1.0.0",
+  "description": "Finds segments in GPX",
+  "main": "extractFromGpx.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tomás Swift-Metcalfe",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^9.1.0",
+    "xml2js": "^0.4.23"
+  }
+}
