@@ -42,18 +42,42 @@ module.exports = (gpxFile, processSegment)=>{
     let preventNegative = ( calc < 0) ? calc * -1 : calc;
     let d = Math.sqrt(preventNegative);
     if( d < 20){
-      console.log('HIT');
+      return ;
     }
 
   }
 
   function matchSegments(points){
-
+    //remove altitude
+    points.pop();
     fs.readFile('segmentSummaries.json', 'utf8', function (err, data) {
       if (err) throw err;
       let segments = JSON.parse(data);
 
+      segments.forEach((seg, i) => {
+        const foundLat = points.find(el => el > seg.startLat - 10 && el < seg.startLat + 10)
+        console.log(foundLat);
+        if(foundLat){
+          let next = points[points.indexOf(foundLat)+ 1];
+          const foundLng = (next > seg.startLng - 10 && next < seg.startLng + 10) ? next : false;
+          console.log(foundLng);
+          if(foundLat && foundLng){
+            console.log(`Found a segment starting at: ${foundLat}, ${foundLng}`);
+          }
+
+        }
+      });
+
     });
+  }
+
+  let sampleSegment = {
+     "id":"3a4800b502ebc3e773045c94951c1e8f",
+     "startLat":11412531.351927586,
+     "startLng":5627273.514122111,
+     "accent":0,
+     "descent":0,
+     "length":0
   }
 
   /**
@@ -110,25 +134,28 @@ module.exports = (gpxFile, processSegment)=>{
   (async ()=>{
     try {
       const jsonData = await xml2JSON(gpxFile),
-            toCoordinates = await toXyz(jsonData.gpx.trk[0].trkseg[0].trkpt),
-            segments = await matchSegments(toCoordinates);
+            toCoordinates = await toXyz(jsonData.gpx.trk[0].trkseg[0].trkpt);
+
+
       //Doesn't check for collisions:
       let id = crypto.randomBytes(16).toString('hex');
       //this option was added as a way to add segments:
       if(processSegment){
+
         sampleSegment.id = id;
         fs.writeFile(`./segments/${id}.json`, JSON.stringify(toCoordinates));
 
         fs.readFile('segmentSummaries.json', 'utf8', function (err, data) {
           if (err) throw err;
           let segments = JSON.parse(data);
-              segments.push(toCoordinates);
+              segments.push(sampleSegment);
 
           fs.writeFile(`./segmentSummaries.json`, JSON.stringify(segments));
 
         });
 
       }else{
+        let segments = await matchSegments(toCoordinates);
         fs.writeFile(`./processedFiles/${id}.json`, JSON.stringify(toCoordinates));
       }
     } catch (e) {
