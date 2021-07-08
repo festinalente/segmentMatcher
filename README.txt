@@ -19,6 +19,7 @@ How to run it:
 
 TODO:
 * Tests,
+* File structure to store files in directories with a HGT like naming scheme,
 * Clean up,
 * Check Duplicates, duplicate names,
 * Docs,
