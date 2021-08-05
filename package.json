@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "fs-extra": "^9.1.0",
+    "google-polyline": "^1.0.3",
     "haversine": "^1.1.1",
     "xml2js": "^0.4.23"
   }

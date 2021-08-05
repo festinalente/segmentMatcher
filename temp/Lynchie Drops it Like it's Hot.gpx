@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+      <gpx creator="testApp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+      <metadata>
+      <time>2021-07-20T14:54:02.065Z</time>
+      </metadata>
+      <trk>
+      <name>Lynchie Drops it Like it's Hot</name>
+      <type>1</type>
+      <trkseg><trkpt lat="37.3506" lon="-8.36196"></trkpt><trkpt lat="37.35093" lon="-8.36241"></trkpt><trkpt lat="37.3512" lon="-8.36274"></trkpt><trkpt lat="37.3514" lon="-8.36294"></trkpt><trkpt lat="37.35237" lon="-8.36375"></trkpt><trkpt lat="37.35336" lon="-8.36452"></trkpt></trkseg></trk></gpx>

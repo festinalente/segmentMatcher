@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+      <gpx creator="testApp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+      <metadata>
+      <time>2021-07-20T14:49:38.140Z</time>
+      </metadata>
+      <trk>
+      <name>Subida Retunda IC-RetundaMessines</name>
+      <type>1</type>
+      <trkseg><trkpt lat="37.25182" lon="-8.27526"></trkpt><trkpt lat="37.25215" lon="-8.27629"></trkpt><trkpt lat="37.25228" lon="-8.27672"></trkpt><trkpt lat="37.25232" lon="-8.27692"></trkpt><trkpt lat="37.25234" lon="-8.27714"></trkpt><trkpt lat="37.25233" lon="-8.27751"></trkpt><trkpt lat="37.25229" lon="-8.27774"></trkpt><trkpt lat="37.25221" lon="-8.27802"></trkpt><trkpt lat="37.25173" lon="-8.27924"></trkpt><trkpt lat="37.25157" lon="-8.27973"></trkpt><trkpt lat="37.2515" lon="-8.28009"></trkpt><trkpt lat="37.25138" lon="-8.28126"></trkpt><trkpt lat="37.25126" lon="-8.28174"></trkpt><trkpt lat="37.25116" lon="-8.28201"></trkpt><trkpt lat="37.25107" lon="-8.2822"></trkpt></trkseg></trk></gpx>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+      <gpx creator="testApp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+      <metadata>
+      <time>2021-07-20T14:54:02.065Z</time>
+      </metadata>
+      <trk>
+      <name>Subida São Marcos da Serra</name>
+      <type>1</type>
+      <trkseg><trkpt lat="37.35961" lon="-8.37655"></trkpt><trkpt lat="37.35985" lon="-8.37668"></trkpt><trkpt lat="37.36004" lon="-8.37672"></trkpt><trkpt lat="37.36066" lon="-8.37676"></trkpt><trkpt lat="37.36092" lon="-8.37675"></trkpt><trkpt lat="37.36104" lon="-8.37677"></trkpt><trkpt lat="37.36135" lon="-8.37675"></trkpt><trkpt lat="37.36148" lon="-8.37672"></trkpt><trkpt lat="37.36153" lon="-8.37672"></trkpt><trkpt lat="37.36159" lon="-8.37676"></trkpt><trkpt lat="37.36187" lon="-8.37718"></trkpt><trkpt lat="37.36199" lon="-8.3774"></trkpt><trkpt lat="37.36202" lon="-8.37743"></trkpt><trkpt lat="37.36202" lon="-8.37747"></trkpt></trkseg></trk></gpx>
