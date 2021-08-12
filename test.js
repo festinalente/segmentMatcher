@@ -1,4 +1,6 @@
 let main = require('./main');
+let status = require('node-status'),
+    console = status.console();
 
 /**
  * test function
@@ -160,6 +162,47 @@ let testValueToInsert = ()=>{
   return [seedMinX * 1.27 * 1.1 * (1.1 * Math.random()), seedMinY * 1.27 * 1.1 * (1.1 * Math.random())];
 }
 
+
+function speed(iterations, fn, args){
+  status.start({
+    pattern: 'Iterations done: {count.default.green}',
+    precision: 0
+  });
+
+  let countIterations = status.addItem('count', {
+    max: iterations
+  });
+
+  async function speedTest(iterations){
+    let sum = 0;
+    let i = 0;
+    while(i < iterations){
+      let start = process.uptime();
+      await fn(...args);
+      let end = process.uptime();
+      sum += (end - start);
+      i++;
+      countIterations.inc();
+      if(i === iterations){
+        console.log(`average time: ${sum/iterations}s`);
+        return;
+      }
+    }
+  }
+  speedTest(iterations);
+}
+
+/* Speed test can be called as follows:
+let test = require('./test.js');
+let main = require('./main.js');
+  test.speed(
+    10,
+    main.processFile,
+    ['./gpxTracks/Easy_150bpm_cadence_90_100rpm_Saw_a_mongoose_near_sapeira.gpx', false, 200]
+  );
+*/
+
+
 function tests(){
   it(`traverseRtree() finds destination for ${levelOne} in tree`, ()=> {
     main.traverseRtree(levelOne, testRtree).then((child)=>{
@@ -207,11 +250,12 @@ function tests(){
     });
   });
 
+/*
   it(`processFile() inserts a segment, when the segment parameter is passed`, async function() {
     let copy = await fs.promises.copyFile('temp/sapeira subida.gpx', 'segmentsFromStravaGPX/sapeira subida.gpx', 3);
     let process = await main.processFile('segmentsFromStravaGPX/sapeira subida.gpx', true);
   });
-/*
+
   it(`processFile() without the segment parameter passed will turn a GPX file into x,y,z points, then search it for segments`, async function(){
     let process = await main.processFile('gpxTracks/Easy_150bpm_cadence_90_100rpm_Saw_a_mongoose_near_sapeira.gpx', false);
   });*/
@@ -272,4 +316,4 @@ function viewTree(){
   console.log(testRtree);
 }
 
-module.exports = {tests};
+module.exports = {tests, speed};

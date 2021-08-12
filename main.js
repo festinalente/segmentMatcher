@@ -1,13 +1,20 @@
 /*Dependancies*/
-const xml2js = require('xml2js').parseString,
-      fs = require('fs-extra'),
-      crypto = require('crypto');
+const xml2js = require('xml2js').parseString;
+/**
+  * This is a C++ module I cobbled together because it was taking xml2js 0.8 s to
+  * parse a 5.1 MB file. Note, I have *very* little experience with C++ and only
+  * started learning it recently, litteraly for couple of days.
+  */
+const cpp_xml2json = require('./cppModules/cpp_xml2json/build/Release/cpp_xml2json.node').XML2JSON;
+const fs = require('fs-extra');
+const crypto = require('crypto');
 
 /**
   * @function xml2JSON - Reads a GPX file and parses it into JSON.
   * @param {string} gpxFileName - The path to the file
   * @returns {Object} - The parsed file
   * @description - Calls xml2js.parseString() to parse a GPX file
+  * @performance - Mean 0.8257652517999976s for 10 iterations on a 5.1 MB file.
   */
 
 function xml2JSON(gpxFileName){
@@ -131,10 +138,11 @@ function toXyz(parsedData){
           /**
            * Adding "a" (planet radius) moving the points uniformly relative
            * to the origin so that they are always in positive 3D space.
+           * I haven't looked into the trigonometry.
            */
-          x = parseInt(((N + h) * clat * Math.cos(rlng) + a)),
-          y = parseInt(((N + h) * clat * Math.sin(rlng) + a)),
-          z = parseInt(((N * (1 - e2) + h) * slat + a ));
+          x = parseInt(((N + h) * clat * Math.cos(rlng)) + a),
+          y = parseInt(((N + h) * clat * Math.sin(rlng)) + a),
+          z = parseInt(((N * (1 - e2) + h) * slat) + a);
 
       xyzPoints.push(x, y, z);
 
@@ -149,6 +157,8 @@ function toXyz(parsedData){
 /**
   * @function countLeaves - Counts leaves in a branch (i.e. excludes sub-branches)
   * @param {Object[]]} leaves - An array "leaves" belonging to a branch.
+  * @retruns {number} - The number leaves (excluding sub-branches) at the top level
+  * of a branch.
   */
 
 function countLeaves(leaves){
@@ -167,23 +177,24 @@ function countLeaves(leaves){
   * @function euclidianDist - Calculates the Euclidian distance between two points.
   * @param {Object[]} a - An array with point coordinates x, y: [x,y] to mesaure from.
   * @param {Object[]} b - An array with point coordinates x, y: [x,y] to mesaure to.
+  * @returns {number }The distance beween two points as an integer float.
   * @description - There are many ways to resolve this problem, e.g. the Haversine
   * formula should in theory provide greater accuaracy.
-  * @returns {number }The distance beween two points as an integer float.
   */
 
 function euclidianDist(a, b){
+  simpleTypeCheck(a, 'array');
+  simpleTypeCheck(b, 'array');
   return Math.sqrt( Math.pow((a[0]-b[0]), 2) + Math.pow((a[1]-b[1]), 2) );
 }
 
 /**
-  * @function setBounds - Updates the bounds of a branch depending on a set of ppints
+  * @function setBounds - Updates the bounds of a branch depending on a single points
   * @param {Object[]} point - An array with x,y point to update branch.
-  * @returns {Object} branch - The updated branch object 
+  * @returns {Object} branch - The updated branch object.
   */
 
 function setBounds(point, branch){
-
   branch.maxX = (point[0] > branch.maxX) ? point[0] : (branch.maxX) ? branch.maxX : 0;
   //If an initialization object is passed with the value zero, update it:
   branch.minX = (point[0] < branch.minX || branch.minX === 0) ? point[0] : (branch.minX) ? branch.minX : 0;
@@ -193,8 +204,13 @@ function setBounds(point, branch){
   return branch;
 }
 
-function setBoundsOnPoints(points){
+/**
+  * @function setBoundsOnPoints - Writes a new bounds object depending on an array of ppints
+  * @param {Object[]} points - An array with many x,y points to update branch.
+  * @returns {Object} newBounds - A new bounds object to be used in a branch.
+  */
 
+function setBoundsOnPoints(points){
   let lat = [];
   let lng = [];
   for (var i = 0; i < points.length; i++) {
@@ -203,7 +219,6 @@ function setBoundsOnPoints(points){
     if(i === points.length-1){
       let latSort = lat.sort();
       let lngSort = lng.sort();
-
       let newBounds = {
         minX: latSort[0],
         minY: lngSort[0],
@@ -216,9 +231,19 @@ function setBoundsOnPoints(points){
   }
 };
 
+/**
+  * @function insertPoint - Inserts a point into a branch of the R-tree.
+  * @param {Object[]} point - An array with the XY coordinates of a point to be
+  * inserted into the R-tree corresponding to the start point of a segment.
+  * @param {Object} branch - The branch to insert the point (typically this branch
+  * is the entire tree).
+  * @description Inserts a point into a branch of the R-tree at the
+  * furthest point, splits the branch if there are more than 9 leaves or sub-branches
+  * in that brach.
+  */
 function insertPoint(point, branch){
-  let promise = new Promise((resolve, reject)=>{
 
+  let promise = new Promise((resolve, reject)=>{
 
     async function insert(point, branch){
       let correctbranch = await traverseRtree(point, branch);
@@ -236,14 +261,12 @@ function insertPoint(point, branch){
             }
             if(i === j){
               correctbranch.leaves.push(split);
-              //return branch for test
-              //resolve(branch);
+
               resolve({branch: branch, segmentName: newLeaf.hash});
             }
           }
       }else{
-        //return branch for test
-        //resolve(branch);
+
         resolve({branch: branch, segmentName: newLeaf.hash});
       }
     }
@@ -254,15 +277,22 @@ function insertPoint(point, branch){
   return promise;
 };
 
-//Would normaly use heirarchical clustering
+/**
+  * @function splitBranch - Crudely splits a branch into two
+  * @param {Object[]} leaves - An array of leaves on a branch.
+  * @returns {Object} - Return the leaves split into new branches.
+  * @description - This is a rather crude way to resolve this, another way would
+  * be to use heirarchical clustering, which although prettier I'm not sure
+  * is better.
+  */
+
 function splitBranch(leaves){
-  //
+
   let promise = new Promise((resolve, reject)=>{
     let sortLat = [],
         lngMidPoinst = 0,
         sortLng = [],
         pointsXY = [];
-
 
     for (let i = 0; i < leaves.length; i++) {
       //skip branches, means split can occur with less leaves
@@ -298,14 +328,6 @@ function splitBranch(leaves){
           branches.push(makeChildBranch(latZero, lngZero, latEndPoint, lngMidPoint, leaves));
           branches.push(makeChildBranch(latZero, lngMidPoint+1, latEndPoint, lngEndPoint, leaves));
         }
-        /*
-        let branches = [
-          makeChildBranch(latZero, lngZero, latMidPoint, lngMidPoint, pointsXY),
-          makeChildBranch(latMidPoint, lngZero, latEndPoint, lngMidPoint, pointsXY),
-          makeChildBranch(latZero, lngMidPoint, latMidPoint, lngEndPoint, pointsXY),
-          makeChildBranch(latMidPoint, lngMidPoint, latEndPoint, lngEndPoint, pointsXY)
-        ];
-        */
 
         Promise.all(branches).then((settled)=>{
           let validBranches = settled.filter((branch)=>{if(branch !== null){return branch}});
@@ -320,13 +342,12 @@ function splitBranch(leaves){
           };
           resolve(leaves);
         });
-        //remove null
+
       }
     }
 
   });
   return promise;
-
 }
 
 /**
@@ -339,6 +360,7 @@ function splitBranch(leaves){
   * @returns {Object} - Returns a branch object or null should there be no leaves
   * in the branch.
   */
+
 function makeChildBranch(minX, minY, maxX, maxY, leaves){
   let promise = new Promise((resolve, reject)=>{
 
@@ -375,6 +397,7 @@ function makeChildBranch(minX, minY, maxX, maxY, leaves){
   * @param {Object[]} point - An array with two points.
   * @returns {Object} - Returns a leaf object with a unique hash.
   */
+
 function makeLeaf(point){
   let leaf = {
     "startPtLat": point[0],
@@ -386,217 +409,226 @@ function makeLeaf(point){
 }
 
 /**
-  * @function findSegments - Finds segments in a track.
+  * @function trim - Trims points from the start or finish of an extarcted segment.
+  * @param {Object[]} point - An array with two XY points to trim to.
+  * @param {Object[]} extract - An array compare with the point provided.
+  * @param {String} startOrFinish - A string "start" or "finish" depending what
+  * requires trimming.
+  * @returns {Promise} - Returns a promise with the extracted points trimmed either
+  * to the start or finish of a segment.
   */
-function findSegments(track){
-  (async ()=>{
-    let trackToXYpoints = await getLatLng(track);
-    let rTree =  await fs.promises.readFile('segmentRTree.json', 'utf8');
-    //traverse R-Tree to see if a match is found
-    let segmentsFound = await comparePoints(trackToXYpoints, rTree);
-    //Read the segments from file:
-    //Doesn't return leaf!
-    let lookUpSegments = await lookUpSegmentFn(segmentsFound);
 
-    let segmentToXY = await getLatLng(lookUpSegments[0]);
-    //find corresponding start and finish points
-    //25m?
-    //findStartFinishPts(trackToXYpoints, lookUpSegments[0], 90);
-    //Run T-test
-    findStartFinishByDistanceReduction(trackToXYpoints, segmentToXY, 200);
+function trim(point, extract, startOrFinish){
+  let promise = new Promise((resolve, reject)=>{
+    let dist = [];
+    let trimed;
+    for (let i = 0; i < extract.length; i++) {
+      let ptDist = euclidianDist(extract[i], point);
+      dist.push(ptDist);
 
-  })();
-
-  function compare(a, b, accuracyInMeters){
-    return (a - b < 0) ? (((a - b) * -1) <= accuracyInMeters) ? true : false :
-        (a - b <= accuracyInMeters) ? true : false;
-  }
-
-  /**
-    * @function trim - Trims points from the start or finish of an extarcted segment.
-    * @param {Object[]} point - An array with two XY points to trim to.
-    * @param {Object[]} extract - An array compare with the point provided.
-    * @param {String} startOrFinish - A string "start" or "finish" depending what
-    * requires trimming.
-    */
-
-  function trim(point, extract, startOrFinish){
-    let promise = new Promise((resolve, reject)=>{
-      let dist = [];
-      let trimed;
-      for (let i = 0; i < extract.length; i++) {
-        let ptDist = euclidianDist(extract[i], point);
-        dist.push(ptDist);
-
-        if(i === extract.length-1){
-          let closest = dist.indexOf(Math.min(...dist));
-          if(startOrFinish === 'start'){
-            trimed = extract.slice(closest);
-            console.log(trimed.length);
-          }
-          if(startOrFinish === 'finish'){
-            trimed = extract.slice(0, closest);
-            console.log(trimed.length);
-          }
-          //console.log(trimed);
-          resolve(trimed);
+      if(i === extract.length-1){
+        let closest = dist.indexOf(Math.min(...dist));
+        if(startOrFinish === 'start'){
+          trimed = extract.slice(closest);
         }
+        if(startOrFinish === 'finish'){
+          trimed = extract.slice(0, closest);
+        }
+        resolve(trimed);
       }
-    });
-    return promise;
-  }
-
-
-function pointsToXYZ(points){
-  let ptsxyz =[];
-  points.forEach((item, b) => {
-    ptsxyz.push(item[0], item[1], null);
-    if(b === points.length-1){
-      console.log(JSON.stringify(ptsxyz));
     }
   });
+  return promise;
 }
 
+/**
+  * @function pointsToXYZ - Convert points XY points to XYZ (adds a null)
+  * @param {Object[]} - Array of arrays of points [[x,y], [x,y]]
+  * @returns {Object[]} - Array with continuous xyz points [x,y,z,x,y,z...]
+  * @description - Internal to this script to help visualize points.
+  */
 
-  let distances = [];
-  let extractXYZ = [];
-  let extract = [];
-  function findStartFinishByDistanceReduction(track, segment, accuracyInMeters){
-    console.log(track[0]);
-    console.log(segment[0]);
+function pointsToXYZ(points){
+  let promise = new Promise((resolve, reject)=>{
+    let ptsxyz =[];
+    points.forEach((item, b) => {
+      ptsxyz.push(item[0], item[1], null);
+      if(b === points.length-1){
+        resolve(ptsxyz);
+      }
+    });
+  });
+  return promise;
+}
+
+/**
+  * @function extractSegement - Extract the points equivalent to a segment from a track.
+  * @param {Object[]} - An array of points corresponding to a track.
+  * @param {Object[]} - An array of points corresponding to a segemnt.
+  * @param {number} - An integer corresponding to the accuracy in meters.
+  * @description - The initial extract can be quite inacurate (e.g. using a large)
+  * number for accuracy, the trimming function then corrects this. Good numbers
+  * tend to be in the range of 10-15.
+  */
+
+function extractSegement(track, segment, accuracyInMeters){
+  let promise = new Promise((resolve, reject)=>{
+    let distances = [];
+    let extractXYZ = [];
+    let extract = [];
+
     for (let i = 0; i < track.length; i++) {
       for (let j = 0; j < segment.length; j++) {
         let dist = euclidianDist(track[i], segment[j]);
         if(dist < accuracyInMeters){
+          //avoid duplicates:
           if(!extract.includes(track[i])){
             extract.push(track[i]);
           }
         }
         if(i === track.length-1 && j === segment.length-1){
-          console.log(extract.length);
+
           trim(segment[0], extract, 'start').then(
             (resultingArray)=>{
-              trim(segment[segment.length-1], resultingArray, 'finish').then((res)=>{
-                pointsToXYZ(res);
+              trim(segment[segment.length-1], resultingArray, 'finish').then(
+                (res)=>{
+
+                  if(res.length === 0){
+                    resolve(null);
+                  }
+                  else{
+                    pointsToXYZ(res).then((xy)=>{
+                      resolve(xy);
+                    });
+                  }
+
+
               });
             });
         }
       }
     }
-  }
-
-
-
-  function findStartFinishPts(track, segment, accuracyInMeters){
-
-    let start = [segment[0], segment[1]];
-    let end = [segment[segment.length-3], segment[segment.length-2]];
-    let startPointInTrack = [];
-    let endPointInTrack = [];
-    let lat = [];
-    let lng = [];
-
-    for (let i = 0; i < track.length; i++) {
-      //if(compare(track[i][0], start[0], accuracyInMeters) && compare(track[i][1], start[1], accuracyInMeters)){
-      if(compare(track[i][0], start[0], accuracyInMeters) && compare(track[i][1], start[1], accuracyInMeters)){
-        startPointInTrack.push(track[i]);
-      }
-
-      if(compare(track[i][0], end[0], accuracyInMeters) && compare(track[i][1], end[1], accuracyInMeters)){
-        endPointInTrack.push(track[i]);
-      }
-      if(i === track.length-1){
-        let segmentEquivalent = track.slice(startPointInTrack[0], endPointInTrack[0]);
-
-        for (let i = 0; i < segmentEquivalent.length; i++) {
-          lat.push(segmentEquivalent[i][0]);
-          lng.push(segmentEquivalent[i][1]);
-          if(i === segmentEquivalent.length-1){
-            console.log(JSON.stringify(lat));
-            console.log(JSON.stringify(lng));
-          }
-        }
-      }
-
-
-    }
-  }
-
-  function lookUpSegmentFn(segmentsFound){
-    let promise = new Promise((resolve, reject)=>{
-      (async ()=>{
-        let segments = [];
-        for (let i = 0; i < segmentsFound.length; i++) {
-          /*TODO: Check if it always returns a branch, or if it also returns a leaf,
-          if it always return a branch, write a little function to get the leaf*/
-          let hash = segmentsFound[i].leaves[1].hash;
-          let readSegment = await fs.promises.readFile(`./segments/${hash}.json`, 'utf8');
-          //Read segments:
-          const segmentJSON = await fs.promises.readFile('segmentRTree.json', 'utf8');
-          //Parse xml:
-          segments.push(JSON.parse(readSegment));
-          if(segmentsFound[i].branch === 1){
-            resolve(segments)
-          }
-        }
-      })();
-    });
-    return promise;
-  }
-
-  function comparePoints(trackToXYpoints, rTree){
-    let promise = new Promise((resolve, reject)=>{
-      let compareAllPoints = [];
-      for (var i = 0; i < trackToXYpoints.length; i++) {
-        //traverseRtree as a race:
-        compareAllPoints.push(traverseRtree(trackToXYpoints[i], rTree));
-
-        if(i === trackToXYpoints.length-1){
-          Promise.all(compareAllPoints).then((result)=>{
-            let filtered = [];
-            //I have a strong preference for for loops over array functions:
-            for (let i = 0; i < result.length; i++) {
-              if(filtered.indexOf(result[i]) === -1){
-                filtered.push(JSON.parse(result[i]));
-              }
-              if(i === result.length-1){
-                resolve(filtered);
-              }
-            }
-
-          });
-        }
-      }
-    });
-    return promise;
-  }
-
-
-  /*
-      lat = await getXYZ('lat', segment);
-      lng = await getXYZ('lng', segment);
-  let altered = await alterbyX(lat, lng);
-      altLat = altered[0]
-      altLng = altered[1];
-  let latT = await tTest(lat, false, altLat, false),
-      lngT = await tTest(lng, false, altLng, false),
-      latCertainty = 100 - Math.abs((latT) * 100),
-      lngCertainty = 100 - Math.abs((lngT) * 100);
-
-  if(latCertainty >= 99 && lngCertainty >= 99){
-    document.querySelector('#fitData').textContent =
-      `Latitude values match with ${latCertainty}% certainty,
-       fuzzy latitude data has length: ${altLat.length} against ${lat.length}.
-       Longitude values match with ${lngCertainty}% certainty,
-       fuzzy longitude data has length: ${altLng.length} against ${lng.length}`;
-    chart(lat, lng, altLat, altLng);
-  }else{
-    let it = document.querySelector('#iterations').textContent;
-    document.querySelector('#iterations').textContent = `${parseInt(it) + 1}`;
-    fire();
-  }*/
+  });
+  return promise;
 }
 
+/**
+  * @function simpleTypeCheck
+  * @description - A simple type checking function for my own use. It checks
+  * for the type of number not just number (int or float), distinguishes between
+  * Array and Object.
+  */
+function simpleTypeCheck(val, requiredType){
+  let type = (typeof val === 'object') ?
+                (Array.isArray(val) === true) ? 'array' : 'object' :
+                (typeof val === 'number') ?
+                  (val % 1 === 0) ? 'integer' : 'float' :
+                    typeof val;
+
+  if(type !== requiredType){
+    let e = new Error(`Incorrect type ${type}, ${requiredType} required.`)
+    throw e;
+  }
+  else{
+    return true;
+  }
+}
+
+
+
+function checkDistanceToSegementStart(segmentLeaves, point, accuracy){
+  simpleTypeCheck(segmentLeaves, 'object');
+  simpleTypeCheck(point, 'array');
+  simpleTypeCheck(accuracy, 'integer');
+
+  let validLeaves = [];
+  let leaves = segmentLeaves.leaves;
+
+  let promise = new Promise((resolve, reject)=>{
+    for (var i = 0; i < leaves.length; i++) {
+      let dist = euclidianDist(point, [leaves[i].startPtLat, leaves[i].startPtLng]);
+      if(dist < accuracy){
+        validLeaves.push(leaves[i]);
+      }
+      if(i === leaves.length-1){
+        if(validLeaves.length > 0){
+          resolve(validLeaves);
+        }
+        else{
+          resolve(null);
+        }
+      }
+    }
+  });
+  return promise;
+}
+
+/**
+  * Compare Points
+  * @namespace ComparePoints
+
+/**
+  *
+  * @function comparePoints - Finds corresponding branch in R-tree.
+  * @memberof ComparePoints
+  * @param {number[][]} trackToXYpoints - An a array of array representing x,y points: [[x,y], [x,y]].
+  * @param {Object} rTree - A branch or entire R-tree to query.
+  * @description
+  */
+
+function comparePoints(trackToXYpoints, rTree, accuracy){
+  simpleTypeCheck(trackToXYpoints, 'array');
+  simpleTypeCheck(rTree, 'object');
+  simpleTypeCheck(accuracy, 'integer');
+
+  let promise = new Promise((resolve, reject)=>{
+    let potentialSegments = [];
+
+    (async ()=>{
+      let i = 0;
+      while(i < trackToXYpoints.length){
+        let segmentLeaves = await traverseRtree(trackToXYpoints[i], rTree);
+        let validLeaves = await checkDistanceToSegementStart(segmentLeaves, trackToXYpoints[i], accuracy);
+        let check = await checkDups(validLeaves, potentialSegments);
+        potentialSegments = check;
+        i++;
+      }
+
+      resolve(potentialSegments);
+    })();
+  });
+  return promise;
+
+}
+
+/**
+  * @function checkDups
+  * @memberof comparePoints
+  * @description - Ugly solution to the problem.
+  */
+
+function checkDups(validLeaves, potentialSegments){
+  let promise = new Promise((resolve, reject)=>{
+    if(!validLeaves){
+      resolve(potentialSegments);
+    }
+    validLeaves.forEach((leaf, j) => {
+      if(!potentialSegments.some(segment => segment.hash === leaf.hash)){
+        potentialSegments.push(leaf);
+      }
+      if(j === validLeaves.length-1){
+        resolve(potentialSegments);
+      }
+    });
+  });
+  return promise;
+}
+
+/**
+  * @function getLatLng - Gets latitude and logitude points (or x, y) from [x,y,z...]
+  * @param {number[]} segment - An array of [x, y, z...] numbers
+  * @returns {number[][]} - An array of arrays containing x, y points [[x,y], [x,y]]
+  */
 
 function getLatLng(segment){
   let promise = new Promise((resolve, reject)=>{
@@ -617,6 +649,17 @@ function getLatLng(segment){
   return promise;
 }
 
+/**
+  * @function getXYZ - Resolves a promise with either XYZ or coordinates from [x,y,z,x,y,z] coordinates
+  * @param {string} xyz - Either 'lat', 'lng', or 'ele'
+  * @param {Object[]} segment - An array of numbers x,y,z.
+  * @returns {Object[]} - An array with either X, Y or Z coordinates.
+  * @description - This function takes a single continuous array of numbers where
+  * in the first in every three corresponds to X or latitude, the second to Y or
+  * longitude, the third Z or elevation. Thus [x,y,z,x,y,z], become [x,x] if
+  * 'lat' is passed as the first pramenter
+  */
+
 function getXYZ(xyz, segment){
   let promise = new Promise((resolve, reject)=>{
     xyz = (xyz === 'lat') ? 0 : (xyz === 'lng') ? 1 : (xyz === 'ele') ? 2 : null;
@@ -636,23 +679,115 @@ function getXYZ(xyz, segment){
   return promise;
 }
 
+/**
+  * @function lookUpSegments - Simply opens segment files and parses
+  * @param {Object[]} segmentsFound - An array with leaf objects corresponding
+  * to segment files to open.
+  */
 
-function processFile(gpx, processSegment){
+function lookUpSegmentFn(segmentsFound){
+  let promise = new Promise((resolve, reject)=>{
+    let segments = [];
+    (async ()=>{
+
+      for (let i = 0; i < segmentsFound.length; i++) {
+        let hash = segmentsFound[i].hash;
+        let readSegment = await fs.promises.readFile(`./segments/${hash}.json`, 'utf8');
+        segments.push(JSON.parse(readSegment));
+
+        if(i === segmentsFound.length-1){
+          resolve(segments);
+        }
+      }
+
+    })();
+  });
+  return promise;
+}
+
+/**
+  * @function processAllInFolder
+  * @description - A function for my own use building a mockup to call processFile()
+  * on every segment in a folder.
+  */
+
+async function processAllInFolder(){
+  let seedIfNeeded = await seedRtree();
+  let files = await fs.promises.readdir('./segmentsFromStravaGPX');
+
+  let i = 0;
+  while(i <files.length){
+    let current =  await processFile(`./segmentsFromStravaGPX/${files[i]}`, true);
+    i++;
+  }
+}
+
+/**
+  * @function seedRtree - Seeds an R-Tree if one doesn't exit.
+  * @description Used mainly for my own use while testing.
+  */
+
+function seedRtree(){
+  let promise = new Promise((resolve, reject)=>{
+    (async ()=>{
+      const rTree = await fs.promises.readFile('segmentRTree.json', 'utf8');
+      const seed = {"minX": 0,"minY": 0,"maxX": 0,"maxY": 0,"branch": 1,"leaves": []};
+      if(rTree.length === 0){
+        let writeRTree = await fs.promises.writeFile(`segmentRTree.json`, JSON.stringify(seed));
+        resolve();
+      }else{
+        //already seeded:
+        resolve();
+      }
+    })();
+  });
+  return promise;
+}
+
+/**
+  * @function processFile
+  * @param {string} GPX - A path to a GPX file either an entire route or a segment.
+  * @param {boolean} processSegment - An option on whether to process and store
+  *  the file as segment.
+  * @param {number} accuracy - An integer (1 ~ 10cm awkwardly).
+  */
+
+
+//Read segments index into memory:
+const rTree = fs.readFileSync('segmentRTree.json', 'utf8');
+//Parse segment data:
+const branch = JSON.parse(rTree);
+
+
+function processFile(gpx, processSegment, accuracy){
+  accuracy = (accuracy) ? accuracy : 200;
+
+  //console.log(toCoordinates);
   let promise = new Promise((resolve, reject)=>{
     //Self instantiating:
     (async ()=>{
       try {
-        //Read segments index into memory:
-        const segmentJSON = await fs.promises.readFile('segmentRTree.json', 'utf8');
-        //Parse segment data:
-        const branch = JSON.parse(segmentJSON);
-        //Parse xml:
-        const jsonData = await xml2JSON(gpx);
-        //Get xyz coordinate data:
-        const toCoordinates = await toXyz(jsonData.gpx.trk[0].trkseg[0].trkpt);
+
+        /**
+         * Parse xml:
+         * This ended up being a slight bottle neck so I used a C++ add on
+         * of my own making (aside the parser) to speed it up. I did this for
+         * fun, I'm completely new to C++, so you might see some ignorant mistakes.
+         * The JavaScript code to do the same thing:
+
+           //Parse XML
+           const jsonData = await xml2JSON(gpx);
+           //Get xyz coordinate data:
+           const toCoordinates = await toXyz(jsonData.gpx.trk[0].trkseg[0].trkpt);
+
+           See README.MD
+
+         */
+
+        const toCoordinates = JSON.parse(cpp_xml2json(gpx, './cppModules/cpp_xml2json/testfile.json'));
+
         //This option was added as a way to add segments to test against:
         if(processSegment){
-          //let write = await writeSegmentData(toCoordinates);
           //Insert segement start point into R-tree
           let insertSegment = await insertPoint([toCoordinates[0],toCoordinates[1]], branch);
           //Save segment, first the start point in the R-tree
@@ -663,8 +798,30 @@ function processFile(gpx, processSegment){
           resolve();
         }
         else {
-          let segments = await findSegments(toCoordinates);
-          resolve();
+          //Better ported to C++ also
+          let trackToXYpoints = await getLatLng(toCoordinates);
+          //Gets all segment that might be on route:
+          let segmentsFound = await comparePoints(trackToXYpoints, branch, accuracy);
+          //Gets the segment files, takes a while.
+          let lookUpSegments = await lookUpSegmentFn(segmentsFound);
+          //console.log(lookUpSegments);
+
+          let i = 0;
+          let extractedSegments = [];
+
+          while(i < lookUpSegments.length){
+            let segmentToXY = await getLatLng(lookUpSegments[i]);
+            /*This might be a surperfluous step as it extracts the segment
+             equivalent points from the track, it would be quicker to just
+             return the segment as a match.*/
+            let extracted = await extractSegement(trackToXYpoints, segmentToXY, accuracy);
+            if(extracted){
+              extractedSegments.push(extracted);
+            }
+            i++;
+          }
+
+          resolve(extractedSegments);
         }
       } catch (err) {
         if (err) throw err;
@@ -674,4 +831,4 @@ function processFile(gpx, processSegment){
   return promise;
 }
 
-module.exports = {processFile, traverseRtree, testWithinBox, makeChildBranch, splitBranch, insertPoint, findSegments};
+module.exports = {processFile, traverseRtree, testWithinBox, makeChildBranch, splitBranch, insertPoint, processAllInFolder, xml2JSON};

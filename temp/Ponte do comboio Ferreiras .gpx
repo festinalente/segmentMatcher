@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-      <gpx creator="testApp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
-      <metadata>
-      <time>2021-07-20T14:49:38.139Z</time>
-      </metadata>
-      <trk>
-      <name>Ponte do comboio Ferreiras </name>
-      <type>1</type>
-      <trkseg><trkpt lat="37.13297" lon="-8.2408"></trkpt><trkpt lat="37.1329" lon="-8.24088"></trkpt><trkpt lat="37.13267" lon="-8.24131"></trkpt><trkpt lat="37.1325" lon="-8.24182"></trkpt><trkpt lat="37.13242" lon="-8.24201"></trkpt><trkpt lat="37.1323" lon="-8.24226"></trkpt><trkpt lat="37.13218" lon="-8.24243"></trkpt><trkpt lat="37.13203" lon="-8.2426"></trkpt><trkpt lat="37.13151" lon="-8.24296"></trkpt><trkpt lat="37.13128" lon="-8.24301"></trkpt><trkpt lat="37.13111" lon="-8.24301"></trkpt><trkpt lat="37.13093" lon="-8.24298"></trkpt><trkpt lat="37.13063" lon="-8.24287"></trkpt><trkpt lat="37.1301" lon="-8.2426"></trkpt><trkpt lat="37.12988" lon="-8.24254"></trkpt><trkpt lat="37.12967" lon="-8.24255"></trkpt><trkpt lat="37.12948" lon="-8.24263"></trkpt><trkpt lat="37.12894" lon="-8.24291"></trkpt><trkpt lat="37.12802" lon="-8.24342"></trkpt></trkseg></trk></gpx>

@@ -1,0 +1,1 @@
+cmd_Release/obj.target/cpp_xml2json.node := g++ -shared -pthread -rdynamic -m64  -Wl,-soname=cpp_xml2json.node -o Release/obj.target/cpp_xml2json.node -Wl,--start-group Release/obj.target/cpp_xml2json/runner.o -Wl,--end-group 

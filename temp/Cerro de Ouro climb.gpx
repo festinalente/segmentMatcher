@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-      <gpx creator="testApp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
-      <metadata>
-      <time>2021-07-20T14:49:38.139Z</time>
-      </metadata>
-      <trk>
-      <name>Cerro de Ouro climb</name>
-      <type>1</type>
-      <trkseg><trkpt lat="37.16227" lon="-8.21885"></trkpt><trkpt lat="37.16151" lon="-8.21879"></trkpt><trkpt lat="37.16116" lon="-8.21879"></trkpt><trkpt lat="37.16085" lon="-8.21881"></trkpt><trkpt lat="37.16024" lon="-8.2189"></trkpt><trkpt lat="37.15964" lon="-8.21903"></trkpt><trkpt lat="37.1592" lon="-8.21916"></trkpt><trkpt lat="37.15913" lon="-8.21924"></trkpt><trkpt lat="37.15908" lon="-8.21921"></trkpt><trkpt lat="37.15892" lon="-8.2192"></trkpt><trkpt lat="37.15876" lon="-8.21923"></trkpt><trkpt lat="37.15859" lon="-8.2193"></trkpt><trkpt lat="37.15848" lon="-8.21938"></trkpt><trkpt lat="37.15836" lon="-8.2195"></trkpt><trkpt lat="37.15828" lon="-8.21964"></trkpt><trkpt lat="37.15817" lon="-8.21977"></trkpt><trkpt lat="37.15795" lon="-8.22"></trkpt><trkpt lat="37.15773" lon="-8.22027"></trkpt><trkpt lat="37.15749" lon="-8.2205"></trkpt><trkpt lat="37.15662" lon="-8.22129"></trkpt><trkpt lat="37.15636" lon="-8.2215"></trkpt><trkpt lat="37.15579" lon="-8.22177"></trkpt><trkpt lat="37.15536" lon="-8.22191"></trkpt><trkpt lat="37.15504" lon="-8.22189"></trkpt><trkpt lat="37.15472" lon="-8.22179"></trkpt><trkpt lat="37.15444" lon="-8.22174"></trkpt></trkseg></trk></gpx>

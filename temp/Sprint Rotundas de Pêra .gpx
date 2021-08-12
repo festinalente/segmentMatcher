@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-      <gpx creator="testApp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
-      <metadata>
-      <time>2021-07-20T14:49:38.140Z</time>
-      </metadata>
-      <trk>
-      <name>Sprint Rotundas de Pêra </name>
-      <type>1</type>
-      <trkseg><trkpt lat="37.10971" lon="-8.33464"></trkpt><trkpt lat="37.10983" lon="-8.33486"></trkpt><trkpt lat="37.11048" lon="-8.33583"></trkpt><trkpt lat="37.11139" lon="-8.33724"></trkpt><trkpt lat="37.11184" lon="-8.33771"></trkpt><trkpt lat="37.11338" lon="-8.33898"></trkpt><trkpt lat="37.11385" lon="-8.33942"></trkpt><trkpt lat="37.11471" lon="-8.34046"></trkpt><trkpt lat="37.11515" lon="-8.34094"></trkpt></trkseg></trk></gpx>
