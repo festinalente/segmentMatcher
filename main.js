@@ -667,36 +667,6 @@ function getLatLng(segment){
 }
 
 /**
-	* @function getXYZ - Resolves a promise with either XYZ or coordinates from [x,y,z,x,y,z] coordinates
-	* @param {string} xyz - Either 'lat', 'lng', or 'ele'
-	* @param {Object[]} segment - An array of numbers x,y,z.
-	* @returns {Object[]} - An array with either X, Y or Z coordinates.
-	* @description - This function takes a single continuous array of numbers where
-	* in the first in every three corresponds to X or latitude, the second to Y or
-	* longitude, the third Z or elevation. Thus [x,y,z,x,y,z], become [x,x] if
-	* 'lat' is passed as the first pramenter
-	*/
-
-function getXYZ(xyz, segment){
-	let promise = new Promise((resolve, reject)=>{
-		xyz = (xyz === 'lat') ? 0 : (xyz === 'lng') ? 1 : (xyz === 'ele') ? 2 : null;
-		let returnVal = [];
-		for(let i = xyz; i < segment.length; i++){
-			 if(i === xyz){
-				 returnVal.push(segment[i]);
-			 }
-			else if( i > xyz && (i - xyz) % 3 === 0){
-				 returnVal.push(segment[i])
-			 };
-			 if(i  === segment.length -1){
-				 resolve(returnVal);
-			 };
-		}
-	});
-	return promise;
-}
-
-/**
 	* @function lookUpSegments - Simply opens segment files and parses
 	* @param {Object[]} segmentsFound - An array with leaf objects corresponding
 	* to segment files to open.
@@ -806,10 +776,10 @@ function processFile(gpx, processSegment, accuracy){
 					//Insert segement start point into R-tree
 					let insertSegment = await insertPoint([toCoordinates[0],toCoordinates[1]], branch);
 					//Save segment, first the start point in the R-tree
-					let writeRTree = await fs.promises.writeFile(`segmentRTree.json`, JSON.stringify(insertSegment.branch));
+					await fs.promises.writeFile('segmentRTree.json', JSON.stringify(insertSegment.branch));
 					//Then the segment file itself with the hash in the segment summary matching filename.
 					/*TOD0: Make file structure mirror R-Tree*/
-					let writeSegment = await fs.promises.writeFile(`./segments/${insertSegment.segmentName}.json`, JSON.stringify(toCoordinates));
+					await fs.promises.writeFile(`./segments/${insertSegment.segmentName}.json`, JSON.stringify(toCoordinates));
 					resolve();
 				}
 				else {
