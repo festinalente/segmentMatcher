@@ -14,12 +14,9 @@ using namespace Napi;
 
 string toXyz(vector<double> xyzPoints){
   int a = 6378137;
-  //double f = 0.00335281066;
   double e2 = 0.00669437999;
 
-  //vector<double> xyzCoordinates;
   std::stringstream xyzCoordinates;
-
 
   long unsigned int lngIt = 1;
   long unsigned int eleIt = 2;

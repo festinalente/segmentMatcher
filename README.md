@@ -1,15 +1,14 @@
-# Segment matching:
+# Segment matcher:
 
 ## How to run:
 
 * Navigate to the folder containing these files,
 * Run node in the CLI (tested on Ubuntu only),
-* Require the app:
+* Require or import the app:
 
   let gpxExt = require('./main');
 
-* Add a segment (takes a GPX currently (quick hack), this could easily be built into a web
-  app where a user selects like stava). Pass the file path and the option "true":
+* Add a segment (this was used to populate the app with actual segments from Strava) Pass the file path and the option "true":
 
   gpxExt('./testSegment.gpx', true);
 
@@ -19,16 +18,14 @@
 
 ## Want to add segments for a given area from Strava?
 
-  /*Require or import, n.b. You may need to add an API key,
-  https://www.strava.com/settings/api these expire quickly, hence mine was
-  committed, it was not done in error.*/
+Require or import, n.b. You may need to add an API key,
+https://www.strava.com/settings/api these expire quickly, hence mine was committed, it was not done in error.
 
-  let stravaSegments = require('fetchSegments.js');
+    let stravaSegments = require('fetchSegments.js');
 
-  /*Where swpt is the southwest point, and nept is the north-east point of the
-  area you want segments for. Large areas are divided up into small 0.05 degree
-  by 0.05 areas*/
-  stravaSegments(swpt, nept);
+Where swpt is the southwest point, and nept is the north-east point of the area you want segments for. Large areas are divided up into small 0.05 degree, by 0.05 areas.
+
+    stravaSegments(swpt, nept);
 
 ## Nomenclature
 * Segment: A JSON file containing an array of x,y,z points in positive space.
