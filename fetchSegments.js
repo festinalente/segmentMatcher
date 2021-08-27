@@ -25,7 +25,7 @@ module.exports = (swpt, nept)=>{
   function getSegments(i, squares){
 
     const url = `https://www.strava.com/api/v3/segments/explore?bounds=${squares[i][0].toString()},${squares[i][1].toString()}
-    &activity_type=riding&access_token=`;
+    &activity_type=riding&access_token=your_token`;
 
     getPolylines(url).then(makeGPX).then(() =>{
       setTimeout(()=>{
