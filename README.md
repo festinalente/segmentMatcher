@@ -1,5 +1,14 @@
 # Segment matcher:
 
+## Demo for my region (Algarve, Portugal)
+
+https://segmentmatcher.appyou.pro
+
+N.b. Load routes in the Algarve for this to be able to detect any segments.
+
+If you wish to run your own version, you can add segments for your own region
+pulled from the Strava API as per the instructions bellow. 
+
 ## How to run:
 
 * Navigate to the folder containing these files,
@@ -14,7 +23,7 @@
 
 * Load a GPX track and test for segments:
 
-  gpxExt('./test.gpx');
+  gpxExt('./test.gpx');  
 
 ## Want to add segments for a given area from Strava?
 
